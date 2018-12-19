@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>test</title>
+  <style>
+    #c {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+<canvas id="c">当前浏览器不支持canvas 请升级！</canvas>
+<button id="btn" onclick="changeData()">更换百分数</button>
+</body>
+<script>
+  var data=0.1,count=10000;
+  newData=0;
+  passNum=0;
+  color='#3c77f6';
+  centerText='今日通过数';
+  shadowColor='#5F9AFF';
+  canvas = document.getElementById("c");
+  ctx  = canvas.getContext("2d");
+  cW=canvas.width = 300;
+  cH=canvas.height = 300;
+  oW = canvas.width - 100;
+  oH = canvas.height - 100;
+  // 线宽
+  lineWidth = 4;
+  // 大半径
+  r = (oW / 2);
+  cR = r - 7*lineWidth;
+  ctx.beginPath();
+  ctx.lineWidth = lineWidth;
+  ctx.strokeStyle = color;
+  // 开始渲染
+  render();
+
+  // 外侧蓝色进度条
+  function buleProgress() {
+    ctx.beginPath();
+    ctx.strokeStyle= color;
+    ctx.lineCap='round';
+    // 画圆 从-90度开始，角度转弧度*Math.PI/180
+    ctx.arc(r+25,r+50, r,- (Math.PI / 2) , newData*2* Math.PI- (Math.PI / 2));
+    ctx.stroke();
+  }
+  // 白色进度条背景
+  function whiteBg(){
+    ctx.beginPath();
+    ctx.fillStyle='#fff';
+    ctx.save();
+    ctx.shadowOffsetX = 1;
+    ctx.shadowOffsetY = 5;
+    ctx.shadowBlur = 8; // 模糊尺寸
+    ctx.shadowColor = shadowColor; // 颜色
+    ctx.arc(r+25,r+50,r,0,2*Math.PI);
+    ctx.fill();
+    ctx.restore();
+  };
+  function buleCircle() {
+    ctx.beginPath();
+    ctx.save();
+    ctx.lineWidth=40;
+    ctx.strokeStyle= color;
+    ctx.arc(r+25,r+50,cR,0,2*Math.PI);
+    ctx.stroke();
+    ctx.restore();
+  }
+  function drawText () {
+    ctx.globalCompositeOperation = 'source-over';
+    var size = 14;
+    ctx.font = size + 'px Microsoft Yahei';
+    txt = centerText;
+    var fonty = r+70;
+    var fontx = r+25;
+    ctx.fillStyle = "#000";
+    ctx.textAlign = 'center';
+    ctx.fillText(txt, fontx, fonty)
+    ctx.font ='bold 20px Microsoft Yahei';
+    txt = passNum;
+    ctx.fillText(txt, fontx, fonty-20);
+  }
+  function drawPercent() {
+    ctx.beginPath();
+    ctx.moveTo(r+25,r+50);
+    var lineAngle=newData* Math.PI - (Math.PI / 2);
+    var  x0=(r+25)+(r+15)*Math.cos(lineAngle),//圆弧上线与圆相交点的x坐标
+      y0=(r+50)+(r+15)*Math.sin(lineAngle);//圆弧上线与圆相交点的y坐标
+      ctx.lineTo(x0,y0);
+      ctx.lineTo(x0+15,y0);
+      ctx.save();
+      ctx.font ='16px Microsoft Yahei';
+      ctx.fillStyle = shadowColor;
+      txt =(newData.toFixed(2)*100).toFixed(0) + '%';
+      ctx.textAlign='left';
+      ctx.fillText(txt, x0+20, y0+8);
+      ctx.lineWidth=lineWidth/2;
+      ctx.strokeStyle=shadowColor;
+      ctx.stroke();
+      ctx.restore();
+  }
+  function render() {
+    ctx.clearRect(0,0,cW,cH);
+    sp=0.003;
+    numdist=272;
+    drawPercent();
+    drawPercent();
+    // 白色进度条背景
+    whiteBg();
+    // 蓝色进度条
+    buleProgress();
+    // 内部蓝色圆圈
+    buleCircle();
+    //文字
+    drawText();
+    if((data - newData) > 0) {
+      newData += sp;
+    }
+    if((data - newData) < 0){
+      newData -= sp;
+    }
+    if((count - passNum) > 0) {
+      passNum += numdist;
+    }
+    if((count - passNum) < 0){
+      passNum -= numdist;
+    }
+    if(Math.abs(count - passNum) < numdist){
+      passNum=count;
+    }
+    requestAnimationFrame(render)
+  }
+  function changeData(){
+    data=Math.random().toFixed(2);
+    count=parseInt(100000*data);
+    render();
+  }
+
+</script>
